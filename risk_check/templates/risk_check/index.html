@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>My test page</title>
+  </head>
+  <body>
+    {% if skill_list %}
+    <ul>
+    {% for skill in skill_list %}
+        <li>{{ skill.skill_name }}</a></li>
+    {% endfor %}
+    </ul>
+    {% else %}
+        <p>No skills are available.</p>
+    {% endif %}
+    <form action="{% url 'check' %}" method="post">
+        {% csrf_token %}
+        <input type="text" name="user_name" id="user_name" placeholder="Name">
+        <input type="text" name="position" id="position", placeholder="Position">
+        <fieldset>
+            <legend><h1>Skill</h1></legend>
+            {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+            
+            {% for choice in skill_list %}
+                <input type="checkbox" name="skill" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
+                <label for="choice{{ forloop.counter }}">{{ choice.skill_name }}</label><br>
+            {% endfor %}
+        </fieldset>
+        <input type="submit" value="Check">
+        </form>
+    
+  </body>
+</html>
+
