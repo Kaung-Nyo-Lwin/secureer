@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "bootstrap5",
     "risk_check.apps.RiskCheckConfig",
     "django.contrib.admin",
     "django.contrib.auth",
