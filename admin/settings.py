@@ -29,7 +29,8 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 # Allow all host headers
-CSRF_TRUSTED_ORIGINS = ['https://*.ondigitalocean.app']
+# CSRF_TRUSTED_ORIGINS = ['https://*.ondigitalocean.app', 'http://127.0.0.1:8000/']
+CSRF_TRUSTED_ORIGINS = ['https://*.', 'http://*']
 
 
 # Application definition
