@@ -32,13 +32,12 @@ class Result(models.Model):
     job_poll = models.PositiveIntegerField(default=0, blank=True, null=True)
     avg_salary = models.DecimalField(max_digits=8, decimal_places=2, default=None, blank=True, null=True)
     industrial_risk_index = models.DecimalField(max_digits=4, decimal_places=2, default=None, blank=True, null=True)
-    
 
     class Meta:
         ordering = ["user_id"]
 
     def __str__(self):
-        return str(self.risk_index)
+        return str(self.id)
 
 class Post(models.Model):
     users = models.ManyToManyField(User)

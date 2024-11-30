@@ -39,7 +39,9 @@ def index(request):
 
 def detail(request, result_id):
     result = get_object_or_404(Result, pk=result_id)
-    return render(request, "risk_check/detail.html", {"result": result})
+    print(type(result))
+    return render(request, "risk_check/result.html", {'result': result})
+    #return render(request, "risk_check/detail.html", {"result": result})
 
 def check(request):
     # create a new user
@@ -52,18 +54,17 @@ def check(request):
     user.save()
     #user.skills.add(request.POST['skills'])
     skills_string = json.loads(request.POST.get('skills'))
-    # print(skills_string)
-    # skills_list = [skill.strip() for skill in skills_string.split(',')]
-    #skills_list = skills_string.split(',')
-    #print(skills_list)
+  
     for skills in skills_string:
         #skills = json.loads(skills)
         skill, created = Skill.objects.get_or_create(skill_name=skills['value'])
         user.skills.add(skill)
     user_id = user.pk
     # save to result
+
     result = Result(user_id = user_id, risk_index = 1, job_poll = 1, avg_salary = 1, industrial_risk_index = 1)
     result.save()
     result_id = result.pk
-   
-    return render(request, "risk_check/detail.html", {"result": result_id})
+
+    return HttpResponseRedirect(reverse("result", args=(result_id,)))
+    #return render(request, "risk_check/detail.html", {"result": result_id})
