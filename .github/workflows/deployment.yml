@@ -33,8 +33,8 @@ jobs:
     # Step 5: Build and tag Docker image
     - name: Build Docker image
       run: |
-        docker build -t your-dockerhub-username/secureer:${{ env.TAG }} .
-        docker tag your-dockerhub-username/secureer:${{ env.TAG }} nyeinchan/secureer:latest
+        docker build -t nyeinchan/secureer:${{ env.TAG }} .
+        docker tag nyeinchan/secureer:${{ env.TAG }} nyeinchan/secureer:latest
 
     # Step 6: Push both tags to Docker Hub
     - name: Push Docker image to Docker Hub
@@ -51,7 +51,7 @@ jobs:
           -d '{
                 "components": [
                   {
-                    "name": "web",  # Replace "web" with your actual component name
+                    "name": "nyeinchan-secureer",  # Replace "web" with your actual component name
                     "source": {
                       "image": {
                         "registry": "docker.io",
