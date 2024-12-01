@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User as AuthUser
 
 class Skill(models.Model):
     skill_name = models.CharField(max_length=200)
@@ -26,21 +27,23 @@ class User(models.Model):
 
 class Result(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    # matched_skilled =  models.ManyToManyField(Skills)
-    # recommended_skilled =  models.ManyToManyField(Skills)
-    risk_index = models.DecimalField(max_digits=4, decimal_places=2, default=None, blank=True, null=True)
-    job_poll = models.PositiveIntegerField(default=0, blank=True, null=True)
-    avg_salary = models.DecimalField(max_digits=8, decimal_places=2, default=None, blank=True, null=True)
-    industrial_risk_index = models.DecimalField(max_digits=4, decimal_places=2, default=None, blank=True, null=True)
+    matched_skills =  models.ManyToManyField(Skill)
+    recommended_skills =  models.JSONField(default=None, blank=True, null=True)
+    recommended_jobs = models.JSONField(default=None, blank=True, null=True)
+
+    # job_poll = models.PositiveIntegerField(default=0, blank=True, null=True)
+    # avg_salary = models.DecimalField(max_digits=8, decimal_places=2, default=None, blank=True, null=True)
+    # industrial_risk_index = models.DecimalField(max_digits=4, decimal_places=2, default=None, blank=True, null=True)
 
     class Meta:
-        ordering = ["user_id"]
+        ordering = ["id"]
 
     def __str__(self):
         return str(self.id)
 
 class Post(models.Model):
-    users = models.ManyToManyField(User)
+    created_by = models.ForeignKey(AuthUser, on_delete=models.CASCADE, related_name='post_created_by', default=None, blank=True, null=True)
+    skills = models.ManyToManyField(Skill)
 
     title = models.CharField(max_length=200)
     descr = models.CharField(max_length=200, default=None, blank=True, null=True)
