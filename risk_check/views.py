@@ -14,6 +14,10 @@ from django.utils import timezone
 import json
 # Create your views here.
 
+# Models
+from .utils import recommend_job, calculate_job_risk, calculate_title_risk, calculate_skill_risk
+
+
 def index(request):
     skills_data = Skill.objects.all()  # Get model instances
     # formatted_skills_data = [
@@ -46,9 +50,29 @@ def detail(request, result_id):
 def check(request):
     # create a new user
     #skills = Skill.objects.get(pk=request.POST["skill"])
-    print(list(request.POST.items()))
+    # print(list(request.POST.items()))
     user_name = request.POST['user_name']
     position = request.POST['position']
+    skills_string = json.loads(request.POST.get('skills'))
+    skills = list()
+    for skill in skills_string:
+        skills.append(skill['value'])
+
+    final_skills = ' and '.join(skills)
+
+    # job risk
+    current_job_risk = calculate_job_risk(position, final_skills)
+    print(current_job_risk)
+
+    # recommendation
+    recommended_titles, recommended_skills = recommend_job(final_skills)
+    recommended_job_risk = dict()
+    for title, skills in zip(recommended_titles, recommended_skills):
+        recommended_job_risk[title] = calculate_job_risk(title, skills)
+
+    print(recommended_job_risk)
+
+
     created_at = timezone.now()
     user = User(user_name = user_name, position = position, created_at = created_at)
     user.save()
@@ -68,3 +92,6 @@ def check(request):
 
     return HttpResponseRedirect(reverse("result", args=(result_id,)))
     #return render(request, "risk_check/detail.html", {"result": result_id})
+
+
+
