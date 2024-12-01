@@ -44,7 +44,9 @@ def index(request):
 def detail(request, result_id):
     result = get_object_or_404(Result, pk=result_id)
     print(result)
-    return render(request, "risk_check/result.html", {'result': result})
+    recommended_job_posts = recommend_job_posts(result.recommended_jobs)
+    print(recommended_job_posts)
+    return render(request, "risk_check/result.html", {'result': result, 'recommended_job_posts': recommended_job_posts})
     #return render(request, "risk_check/detail.html", {"result": result})
 
 def check(request):
@@ -117,7 +119,6 @@ def check(request):
     # result.save()
     # result_id = result.pk
     
-
     return HttpResponseRedirect(reverse("result", args=(result_id,)))
     #return render(request, "risk_check/detail.html", {"result": result_id})
 

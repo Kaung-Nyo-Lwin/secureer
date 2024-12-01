@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css">
 </head>
 <body>
-    
     <div class="container">
       <div class="row justify-content-md-center">
         <div class="col col-lg-6">
@@ -106,6 +105,19 @@
                 <button type="button" class="btn btn-outline-success p-2 m-1">{{title|truncatechars:40}}</button>
               {% endfor %}
             </div>
+          </div>
+        </div>
+        <hr>
+        <div class="row justify-content-md-center">
+          <div class="col col-lg-6">
+            <h5>Recommended Job</h5>
+            <div class="card">
+              {% for posts in recommended_job_posts %}
+              <div class="card-body">
+                <p class="card-title">{{posts}}</p>
+              </div>
+              {% endfor %}
+            </div>            
           </div>
         </div>
         <hr>
