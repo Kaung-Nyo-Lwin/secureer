@@ -19,5 +19,5 @@ COPY . /app/
 EXPOSE 8000
 
 # Run migrations and start the Django development server
-# CMD ["python", "manage.py", "migrate"]
+CMD ["python", "manage.py", "migrate"]
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

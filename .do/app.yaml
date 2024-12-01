@@ -1,0 +1,8 @@
+name: secureer
+services:
+- name: secureer
+  image:
+    registry_type: GHCR
+    registry: Nyeinchanaung
+    repository: secureer
+    digest: 49aadc2
