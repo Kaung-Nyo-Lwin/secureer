@@ -12,6 +12,7 @@ df_skill = pd.read_csv('./ml_models/df_skill.csv')
 onet_embeddings = transformer.encode(df_skill['O∗NET Description'].to_list())
 recommender = joblib.load('./ml_models/recommender_model')
 df = pd.read_csv('./ml_models/df_processed.csv')
+df_posts = pd.read_excel('./ml_models/job_listings_query_result_2024-11-04T05_58_13.074135Z.xlsx')
 
 
 def calculate_title_risk(title):
@@ -49,3 +50,10 @@ def recommend_job(skills):
     recommended_skills = df.iloc[indices[0]]['Job Skills'].to_list()
     return recommended_titles, recommended_skills
 
+
+def recommend_job_posts(titles):
+    recommended_job_posts = list()
+    for title in titles:
+        recommended_job_posts.extend(
+            df_posts[df_posts.Title == title][['Title', 'Updated At', 'Job Summary']].values.tolist())
+    return recommended_job_posts

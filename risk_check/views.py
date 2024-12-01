@@ -15,7 +15,7 @@ import json
 # Create your views here.
 
 # Models
-from .utils import recommend_job, calculate_job_risk, calculate_title_risk, calculate_skill_risk
+from .utils import recommend_job, calculate_job_risk, recommend_job_posts
 
 
 def index(request):
@@ -64,13 +64,18 @@ def check(request):
     current_job_risk = calculate_job_risk(position, final_skills)
     print(current_job_risk)
 
-    # recommendation
+    # job recommendation
     recommended_titles, recommended_skills = recommend_job(final_skills)
     recommended_job_risk = dict()
     for title, skills in zip(recommended_titles, recommended_skills):
         recommended_job_risk[title] = calculate_job_risk(title, skills)
 
     print(recommended_job_risk)
+
+    # job post recommendation
+    recommended_job_posts = recommend_job_posts(recommended_titles)
+    print(recommended_job_posts)
+
 
 
     created_at = timezone.now()
