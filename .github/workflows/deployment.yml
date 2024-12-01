@@ -25,12 +25,12 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    # Step 4: Build the Docker image
+    # Step 4: Build the Docker image with the 'latest' tag
     - name: Build Docker image
       run: |
-        docker build -t nyeinchan/secureer:latest .
+        docker build -t nyeinchan/secureer:doapp .
 
-    # Step 5: Push Docker image to Docker Hub
+    # Step 5: Push Docker image to Docker Hub with the 'latest' tag
     - name: Push Docker image to Docker Hub
       run: |
         docker push nyeinchan/secureer:doapp
