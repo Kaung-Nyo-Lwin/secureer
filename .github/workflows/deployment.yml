@@ -30,11 +30,11 @@ jobs:
       id: vars
       run: echo "TAG=git-${{ github.sha }}" >> $GITHUB_ENV
 
-    # Step 5: Build the Docker image with a unique tag
+    # Step 5: Build and tag Docker image
     - name: Build Docker image
       run: |
-        docker build -t nyeinchan/secureer:${{ env.TAG }} .
-        docker tag nyeinchan/secureer:${{ env.TAG }} nyeinchan/secureer:latest
+        docker build -t your-dockerhub-username/secureer:${{ env.TAG }} .
+        docker tag your-dockerhub-username/secureer:${{ env.TAG }} nyeinchan/secureer:latest
 
     # Step 6: Push both tags to Docker Hub
     - name: Push Docker image to Docker Hub
@@ -51,7 +51,7 @@ jobs:
           -d '{
                 "components": [
                   {
-                    "name": "nyeinchan-secureer",
+                    "name": "web",  # Replace "web" with your actual component name
                     "source": {
                       "image": {
                         "registry": "docker.io",
@@ -62,4 +62,9 @@ jobs:
                   }
                 ]
               }' \
-          https://api.digitalocean.com/v2/apps/${{ secrets.DO_APP_NAME }}/deployments
+          https://api.digitalocean.com/v2/apps/${{ secrets.DO_APP_NAME }}/deployments \
+        -v  # Verbose flag for debugging
+
+    # Step 8: Log API Response (for debugging)
+    - name: Log DigitalOcean API Response
+      run: echo "Redeploy request completed. Check DigitalOcean for updates."
