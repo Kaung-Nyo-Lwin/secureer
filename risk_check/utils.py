@@ -18,7 +18,7 @@ def calculate_title_risk(title):
     title_embed = transformer.encode([title])
     cluster = job_title_risk_model.predict(title_embed)[0]
     labels = job_title_risk_model.labels_
-    title_risk = np.mean(df_title_risk.iloc[np.where(labels == cluster)[0]]['Probability'])
+    title_risk = float(np.mean(df_title_risk.iloc[np.where(labels == cluster)[0]]['Probability'])).__round__(2)
     return title_risk
 
 
@@ -30,7 +30,7 @@ def calculate_skill_risk(skills):
         for onet in onet_embeddings:
             similarity.append(1 - cosine_similarity(skill.reshape(1, skill.shape[0]), onet.reshape(1, onet.shape[0]))[0])
         mean_similarity.append(np.sum(similarity))
-    skill_risk = np.sum(mean_similarity) / (len(skills_embed) * len(onet_embeddings))
+    skill_risk = float(np.sum(mean_similarity) / (len(skills_embed) * len(onet_embeddings))).__round__(2)
     return skill_risk
 
 

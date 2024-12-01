@@ -27,7 +27,8 @@ class User(models.Model):
 
 class Result(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    matched_skills =  models.ManyToManyField(Skill)
+    matched_skills =  models.ManyToManyField(Skill, related_name='matched_skills', default=None, blank=True, null=True)
+    risk_index = models.DecimalField(max_digits=4, decimal_places=2, default=None, blank=True, null=True)
     recommended_skills =  models.JSONField(default=None, blank=True, null=True)
     recommended_jobs = models.JSONField(default=None, blank=True, null=True)
 
@@ -43,7 +44,7 @@ class Result(models.Model):
 
 class Post(models.Model):
     created_by = models.ForeignKey(AuthUser, on_delete=models.CASCADE, related_name='post_created_by', default=None, blank=True, null=True)
-    skills = models.ManyToManyField(Skill)
+    skills = models.ManyToManyField(Skill, related_name='post_skills', default=None, blank=True, null=True)
 
     title = models.CharField(max_length=200)
     descr = models.CharField(max_length=200, default=None, blank=True, null=True)

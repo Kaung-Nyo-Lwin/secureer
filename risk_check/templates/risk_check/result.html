@@ -18,41 +18,38 @@
       <p>{{result.id}}</p>
       <p>{{result.recommended_skills}}</p>
       <p>{{result.recommended_jobs}}</p>
-
-    </div>
       <div class="container">
         <div class="row justify-content-md-center">
           <div class="alert alert-success" role="alert">
-            <h4 class="alert-heading">Well done!</h4>
-            <p>Aww yeah, you successfully read this important alert message. This example text is going to run a bit longer so that you can see how spacing within an alert works with this kind of content.</p>
-            <hr>
-            <p class="mb-0">Whenever you need to, be sure to use margin utilities to keep things nice and tidy.</p>
+            <p>Estimated risk of automation:</p>
+              <h4 class="alert-heading"> {{result.risk_index}} &#37;</h4>
+              {% if result.risk_index > 70 %}
+              <p class="mb-0">High Risk</p>
+              {% elif result.risk_index > 40 %}
+              <p class="mb-0">Moderate Risk</p>
+              {% else %}
+              <p class="mb-0">Low Risk</p>
+              {% endif %}
+              <hr>
+            </div>
           </div>
         </div>
-        <div class="row">
-          <ol class="list-group list-group-numbered">
-            <li class="list-group-item d-flex justify-content-between align-items-start">
-              <div class="ms-2 me-auto">
-                <div class="fw-bold">Subheading</div>
-                Cras justo odio
-              </div>
-              <span class="badge bg-primary rounded-pill">14</span>
-            </li>
-            <li class="list-group-item d-flex justify-content-between align-items-start">
-              <div class="ms-2 me-auto">
-                <div class="fw-bold">Subheading</div>
-                Cras justo odio
-              </div>
-              <span class="badge bg-primary rounded-pill">14</span>
-            </li>
-            <li class="list-group-item d-flex justify-content-between align-items-start">
-              <div class="ms-2 me-auto">
-                <div class="fw-bold">Subheading</div>
-                Cras justo odio
-              </div>
-              <span class="badge bg-primary rounded-pill">14</span>
-            </li>
-          </ol>
+        <div class="row justify-content-md-center">
+          <div class="col">
+            <div class="bd-callout bd-callout-warning">
+              <h5>Warning</h5>
+              <p>Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+              <ol class="list-group list-group-numbered">
+                {% for title, risk in result.recommended_jobs.items %}
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                  <div class="ms-2 me-auto">
+                    <div class="fw-bold">{{title}}</div>
+                  </div>
+                  <span class="badge bg-primary rounded-pill">{{ risk }}</span>
+                </li>
+                {% endfor %}
+              </ol>
+            </div>
         </div>
         <div class="row">
           <div class="col">
@@ -62,7 +59,7 @@
               <button type="button" class="btn btn-info">Inf adsf asdf adsf </button>
               <button type="button" class="btn btn-info">asdf adf asdfad</button>
               <button type="button" class="btn btn-info">asdf</button>
-            </div
+            </div>
           </div>
       </div>
   </body>

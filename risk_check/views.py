@@ -62,6 +62,7 @@ def check(request):
 
     # job risk
     current_job_risk = calculate_job_risk(position, final_skills)
+    current_job_risk = current_job_risk*100
     print(current_job_risk)
 
     # recommendation
@@ -71,7 +72,6 @@ def check(request):
         recommended_job_risk[title] = calculate_job_risk(title, skills)
 
     print(recommended_job_risk)
-
 
     created_at = timezone.now()
     user = User(user_name = user_name, position = position, created_at = created_at)
@@ -86,9 +86,23 @@ def check(request):
     user_id = user.pk
     # save to result
 
-    result = Result(user_id = user_id, risk_index = 1, job_poll = 1, avg_salary = 1, industrial_risk_index = 1)
+    result = Result(user_id = user_id, 
+                    recommended_skills = recommended_skills, 
+                    recommended_jobs = recommended_job_risk,
+                    risk_index = current_job_risk
+                    )
     result.save()
+
+    for title in recommended_titles:
+        #skills = json.loads(skills)
+        skill, created = Skill.objects.get_or_create(skill_name=title)
+        result.matched_skills.add(skill)
     result_id = result.pk
+
+    # result = Result(user_id = user_id, risk_index = 1, job_poll = 1, avg_salary = 1, industrial_risk_index = 1)
+    # result.save()
+    # result_id = result.pk
+    
 
     return HttpResponseRedirect(reverse("result", args=(result_id,)))
     #return render(request, "risk_check/detail.html", {"result": result_id})
