@@ -10,11 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout repository
+    # Step 1: Checkout the code from GitHub
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    # Step 2: Set up Docker Buildx
+    # Step 2: Set up Docker Buildx for multi-platform builds
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
@@ -25,24 +25,15 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    # Step 4: Generate a unique tag for the Docker image
-    - name: Set Docker image tag
-      id: vars
-      run: echo "TAG=git-${{ github.sha }}" >> $GITHUB_ENV
-
-    # Step 5: Build and tag Docker image
+    # Step 4: Build the Docker image with the 'latest' tag
     - name: Build Docker image
       run: |
-        docker build -t nyeinchan/secureer:${{ env.TAG }} .
-        docker tag nyeinchan/secureer:${{ env.TAG }} nyeinchan/secureer:latest
-
-    # Step 6: Push both tags to Docker Hub
+        docker build -t nyeinchan/secureer:doapp .
+    # Step 5: Push Docker image to Docker Hub with the 'latest' tag
     - name: Push Docker image to Docker Hub
       run: |
-        docker push nyeinchan/secureer:${{ env.TAG }}
-        docker push nyeinchan/secureer:latest
-
-    # Step 7: Trigger redeploy on DigitalOcean App Platform
+        docker push nyeinchan/secureer:doapp
+    # Step 6: Trigger a redeploy on DigitalOcean App Platform
     - name: Trigger DigitalOcean App Platform Redeploy
       run: |
         curl -X POST \
@@ -51,20 +42,15 @@ jobs:
           -d '{
                 "components": [
                   {
-                    "name": "nyeinchan-secureer",  # Replace "web" with your actual component name
+                    "name": "nyeinchan-secureer",
                     "source": {
                       "image": {
                         "registry": "docker.io",
                         "repository": "nyeinchan/secureer",
-                        "tag": "'${{ env.TAG }}'"
+                        "tag": "doapp"
                       }
                     }
                   }
                 ]
               }' \
-          https://api.digitalocean.com/v2/apps/${{ secrets.DO_APP_NAME }}/deployments \
-        -v  # Verbose flag for debugging
-
-    # Step 8: Log API Response (for debugging)
-    - name: Log DigitalOcean API Response
-      run: echo "Redeploy request completed. Check DigitalOcean for updates."
+          https://api.digitalocean.com/v2/apps/${{ secrets.DO_APP_NAME }}/deployments
