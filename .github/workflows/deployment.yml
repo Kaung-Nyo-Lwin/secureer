@@ -68,7 +68,7 @@ jobs:
           -d '{
                 "components": [
                   {
-                    "name": "web",
+                    "name": "secureer",
                     "run_command": "python manage.py migrate --noinput"
                   }
                 ]
