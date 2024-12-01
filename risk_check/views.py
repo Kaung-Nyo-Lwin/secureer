@@ -10,7 +10,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
-
+from django.shortcuts import render
 import json
 # Create your views here.
 
@@ -39,7 +39,10 @@ def index(request):
 
 def detail(request, result_id):
     result = get_object_or_404(Result, pk=result_id)
-    print(type(result))
+    #print(type(result))
+    # query post with skills    
+    
+
     return render(request, "risk_check/result.html", {'result': result})
     #return render(request, "risk_check/detail.html", {"result": result})
 
