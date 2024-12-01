@@ -47,39 +47,49 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css">
 </head>
 <body>
-<div class="container mt-5">
-    <h1 class="mb-3">Securing Your Career Path</h1>
-    <h2 class="mb-4">with  Job Automation Risk Prediction</h2>
-    <form action="{% url 'check' %}" method="post">
-        {% csrf_token %}
-        <div class="mb-3">
-            <label for="name" class="form-label">Name</label>
-            <input type="text" class="form-control" id="" name="user_name" placeholder="Enter your name" required>
+    <div class="container">
+        <div class="row justify-content-md-center">
+            <div class="col col-lg-6">
+                <img src="{% static 'risk_check/images/logo-dark.png' %}" width="100px" alt="Logo" class="rounded mx-auto d-block float-end">
+                <h1 class="mb-3">Securing Your Career Path</h1>
+                <h3 class="mb-4">with  Job Automation Risk Prediction</h3>
+            </div>
         </div>
-        <div class="mb-3">
-            <label for="position" class="form-label">Position</label>
-            <input type="text" class="form-control" id="position" name="position" placeholder="Enter your position" required>
+    
+        <div class="row justify-content-md-center">
+            <div class="col col-lg-6">
+                <form action="{% url 'check' %}" method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="" name="user_name" placeholder="Enter your name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="position" class="form-label">Position</label>
+                        <input type="text" class="form-control" id="position" name="position" placeholder="Enter your position" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="skills" class="form-label">Skills</label>
+                        <input type="text" class="form-control" id="skills" name="skills" placeholder="Enter your skills" required>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="jobCheck" name="looking_for_job">
+                        <label class="form-check-label" for="jobCheck">I'm looking for a job</label>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="skillCheck" name="improve_skill">
+                        <label class="form-check-label" for="skillCheck">I want to improve my skill</label>
+                    </div>
+                    <div class="mb-3">
+                      <i>By submitting the form you agree to our <a href="google.com" target="blank">privacy policy.</a></i>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
         </div>
-        <div class="mb-3">
-            <label for="skills" class="form-label">Skills</label>
-            <input type="text" class="form-control" id="skills" name="skills" placeholder="Enter your skills" required>
-        </div>
-        <div class="mb-3 form-check">
-            <input type="checkbox" class="form-check-input" id="jobCheck" name="looking_for_job">
-            <label class="form-check-label" for="jobCheck">I'm looking for a job</label>
-        </div>
-        <div class="mb-3 form-check">
-            <input type="checkbox" class="form-check-input" id="skillCheck" name="improve_skill">
-            <label class="form-check-label" for="skillCheck">I want to improve my skill</label>
-        </div>
-        <div class="mb-3">
-          <i>By submitting the form you agree to our <a href="google.com" target="blank">privacy policy.</a></i>
-        </div>
-        
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
-</div>
-
+    </div>
+</body>
 <script>
     // Initialize Tagify on the skills input
     const skillsData = {{ skills_data|safe }}
@@ -92,7 +102,5 @@
         },
     });
 </script>
-
-</body>
 </html>
 

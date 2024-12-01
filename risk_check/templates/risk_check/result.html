@@ -1,4 +1,5 @@
 {% load static %}
+{% load custom_filters %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,10 +15,11 @@
     <div class="container">
       <div class="row justify-content-md-center">
         <div class="col col-lg-6">
-          <h1 class="mb-3">Securing Your Career Path</h1>
-          <h2 class="mb-4">with  Job Automation Risk Prediction</h2>
+            <img src="{% static 'risk_check/images/logo-dark.png' %}" width="100px" alt="Logo" class="rounded mx-auto d-block float-end">
+            <h1 class="mb-3">Securing Your Career Path</h1>
+            <h3 class="mb-4">with  Job Automation Risk Prediction</h3>
         </div>
-      </div>
+    </div>
       <div class="row justify-content-md-center">
         <div class="col col-lg-6">
           {% if result.risk_index > 70 %}
@@ -25,7 +27,7 @@
             <div class="row">
               <div class="col">
                 <p>Estimated risk of automation:</p>
-                <h4 class="alert-heading"> {{result.risk_index}} &#37;</h4>                
+                <h2 class="alert-heading"> {{result.risk_index}} &#37;</h2>                
               <p class="mb-0">Hight Risk</p>
             </div>
             <div class="col">
@@ -66,13 +68,19 @@
             <div class="bd-callout bd-callout-warning">
               <h5>Recommended Job Title</h5>
                 <p>According to you skill, following position are suggested to apply.</p>
-                <ol class="list-group list-group-numbered">
+                <ol class="list-group list-group-numbered m-4">
+                  <li>
+                    <div class="ms-4 me-auto">
+                      <h8 class="fw-bold float-start">Job Title</h8>
+                      <h8 class="fw-bold float-end">Estimated Risk</h8>
+                    </div>
+                  </li>
                   {% for title, risk in result.recommended_jobs.items %}
                   <li class="list-group-item d-flex justify-content-between align-items-start">
-                    <div class="ms-2 me-auto">
+                    <div class="ms-4 me-auto">
                       <div class="fw-bold">{{title}}</div>
                     </div>
-                    <span class="badge bg-primary rounded-pill">{{ risk }}</span>
+                    <span class="badge bg-primary rounded-pill">{{ risk|multiply:100 }} &#37;</span>
                   </li>
                   {% endfor %}
                 </ol>
@@ -111,13 +119,22 @@
         <div class="row justify-content-md-center">
           <div class="col col-lg-6">
             <h5>Recommended Job</h5>
-            <div class="card">
-              {% for posts in recommended_job_posts %}
-              <div class="card-body">
-                <p class="card-title">{{posts}}</p>
+            {% for job in recommended_job_posts %}
+            <div class="card mb-3">
+              <div class="row g-0">
+                <div class="col-md-2">
+                  <img src="{% static 'risk_check/images/myjob.png' %}" alt="MyJob" class="img-fluid float-start p-2" style="max-width: 120px;">
+                </div>
+                <div class="col-md-10">
+                  <div class="card-body">
+                    <h5 class="card-title">{{job.Title}}</h5>
+                  <p class="card-title">{{job.JobSummary|safe}}</p>
+                  <p class="card-text float-end"><small class="text-muted">Posted at: {{job.UpdatedAt}}</small></p>
+                  </div>
+                </div>
               </div>
-              {% endfor %}
-            </div>            
+            </div>
+            {% endfor %}         
           </div>
         </div>
         <hr>

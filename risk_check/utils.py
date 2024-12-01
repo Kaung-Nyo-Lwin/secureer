@@ -51,9 +51,28 @@ def recommend_job(skills):
     return recommended_titles, recommended_skills
 
 
+# def recommend_job_posts(titles):
+#     recommended_job_posts = list()
+#     for title in titles:
+#         # recommended_job_posts.extend(
+#         #     df_posts[df_posts.Title == title][['Title', 'Updated At', 'Job Summary']].values.tolist())
+#         recommended_job_posts.extend(
+#             df_posts[df_posts.Title == title][['Title', 'Updated At', 'Job Summary']].to_dict('records'))
+#     return recommended_job_posts
+
 def recommend_job_posts(titles):
-    recommended_job_posts = list()
+    recommended_job_posts = []
     for title in titles:
-        recommended_job_posts.extend(
-            df_posts[df_posts.Title == title][['Title', 'Updated At', 'Job Summary']].values.tolist())
+        # Fetch the posts as a list of dictionaries
+        job_posts = df_posts[df_posts.Title == title][['Title', 'Updated At', 'Job Summary']].to_dict('records')
+
+        # Rename keys to remove spaces
+        updated_job_posts = [
+            {key.replace(" ", ""): value for key, value in job_post.items()}
+            for job_post in job_posts
+        ]
+
+        # Extend the list with the updated job posts
+        recommended_job_posts.extend(updated_job_posts)
+
     return recommended_job_posts
