@@ -10,11 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout the code from GitHub
+    # Step 1: Checkout repository
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    # Step 2: Set up Docker Buildx for multi-platform builds
+    # Step 2: Set up Docker Buildx
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
@@ -25,41 +25,41 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    # Step 4: Build the Docker image
+    # Step 4: Generate a unique tag for the Docker image
+    - name: Set Docker image tag
+      id: vars
+      run: echo "TAG=git-${{ github.sha }}" >> $GITHUB_ENV
+
+    # Step 5: Build the Docker image with a unique tag
     - name: Build Docker image
       run: |
-        docker build -t nyeinchan/secureer:doapp .
+        docker build -t nyeinchan/secureer:${{ env.TAG }} .
+        docker tag nyeinchan/secureer:${{ env.TAG }} nyeinchan/secureer:latest
 
-    # Step 5: Push Docker image to Docker Hub
+    # Step 6: Push both tags to Docker Hub
     - name: Push Docker image to Docker Hub
       run: |
-        docker push nyeinchan/secureer:doapp
+        docker push nyeinchan/secureer:${{ env.TAG }}
+        docker push nyeinchan/secureer:latest
 
-    # Step 6: Deploy to DigitalOcean App Platform using the DigitalOcean API
-    - name: Deploy to DigitalOcean App Platform
+    # Step 7: Trigger redeploy on DigitalOcean App Platform
+    - name: Trigger DigitalOcean App Platform Redeploy
       run: |
         curl -X POST \
           -H "Content-Type: application/json" \
           -H "Authorization: Bearer ${{ secrets.DO_ACCESS_TOKEN }}" \
           -d '{
-                "spec": {
-                  "name": "'${{ secrets.DO_APP_NAME }}'",
-                  "services": [
-                    {
-                      "name": "web",
-                      "image": "nyeinchan/secureer:doapp",
-                      "envs": [
-                        {
-                          "key": "DJANGO_SECRET_KEY",
-                          "value": "django-insecure-u8_nf*9t9raz!8+!!1w=qih)w7b_wx&f2626pb+!xo(sfu#wy%"
-                        },
-                        {
-                          "key": "DEBUG",
-                          "value": "false"
-                        }
-                      ]
+                "components": [
+                  {
+                    "name": "nyeinchan-secureer",
+                    "source": {
+                      "image": {
+                        "registry": "docker.io",
+                        "repository": "nyeinchan/secureer",
+                        "tag": "'${{ env.TAG }}'"
+                      }
                     }
-                  ]
-                }
+                  }
+                ]
               }' \
-          https://api.digitalocean.com/v2/apps/${{ secrets.DO_APP_NAME }}/deploy
+          https://api.digitalocean.com/v2/apps/${{ secrets.DO_APP_NAME }}/deployments
