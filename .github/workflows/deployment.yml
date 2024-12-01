@@ -46,7 +46,7 @@ jobs:
           -d '{
                 "components": [
                   {
-                    "name": "web",  # Replace with your component name if it's not "web"
+                    "name": "secureer",  # Replace with your component name if it's not "web"
                     "source": {
                       "image": {
                         "registry": "docker.io",
