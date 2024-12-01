@@ -8,6 +8,9 @@ ENV PYTHONUNBUFFERED 1
 # Set working directory
 WORKDIR /app
 
+# Create a writable directory for SQLite database
+RUN mkdir -p /app/db && chmod -R 777 /app/db
+
 # Install dependencies
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
@@ -19,5 +22,10 @@ COPY . /app/
 EXPOSE 8000
 
 # Run migrations and start the Django development server
-CMD ["python", "manage.py", "migrate"]
+
+RUN python manage.py migrate --noinput
+
+#RUN python manage.py collectstatic --noinput
+
+#CMD ["python", "manage.py", "migrate"]
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
