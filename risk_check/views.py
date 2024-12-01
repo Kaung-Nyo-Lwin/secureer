@@ -43,7 +43,7 @@ def index(request):
 
 def detail(request, result_id):
     result = get_object_or_404(Result, pk=result_id)
-    print(type(result))
+    print(result)
     return render(request, "risk_check/result.html", {'result': result})
     #return render(request, "risk_check/detail.html", {"result": result})
 
@@ -82,11 +82,16 @@ def check(request):
     user.save()
     #user.skills.add(request.POST['skills'])
     skills_string = json.loads(request.POST.get('skills'))
-  
+    
+    matched_skills = list()
+
     for skills in skills_string:
         #skills = json.loads(skills)
         skill, created = Skill.objects.get_or_create(skill_name=skills['value'])
         user.skills.add(skill)
+        if skills['value'] in recommended_skills:
+            matched_skills.append(skill)
+        print(matched_skills)
     user_id = user.pk
     # save to result
 
@@ -96,11 +101,16 @@ def check(request):
                     risk_index = current_job_risk
                     )
     result.save()
+    
+    matched_skills = Skill.objects.filter(skill_name__in=matched_skills)
+    result.matched_skills.add(*matched_skills)
 
-    for title in recommended_titles:
-        #skills = json.loads(skills)
-        skill, created = Skill.objects.get_or_create(skill_name=title)
-        result.matched_skills.add(skill)
+    # for title in recommended_titles:
+    #     #skills = json.loads(skills)
+    #     skill, created = Skill.objects.get_or_create(skill_name=title)
+    #     result.matched_skills.add(skill)
+    #     matched_skills.append(skill)
+
     result_id = result.pk
 
     # result = Result(user_id = user_id, risk_index = 1, job_poll = 1, avg_salary = 1, industrial_risk_index = 1)

@@ -13,55 +13,103 @@
 <body>
     
     <div class="container">
-      <h1 class="mb-3">Securing Your Career Path</h1>
-      <h2 class="mb-4">with  Job Automation Risk Prediction</h2>
-      <p>{{result.id}}</p>
-      <p>{{result.recommended_skills}}</p>
-      <p>{{result.recommended_jobs}}</p>
-      <div class="container">
-        <div class="row justify-content-md-center">
-          <div class="alert alert-success" role="alert">
-            <p>Estimated risk of automation:</p>
-              <h4 class="alert-heading"> {{result.risk_index}} &#37;</h4>
-              {% if result.risk_index > 70 %}
-              <p class="mb-0">High Risk</p>
-              {% elif result.risk_index > 40 %}
-              <p class="mb-0">Moderate Risk</p>
-              {% else %}
-              <p class="mb-0">Low Risk</p>
-              {% endif %}
-              <hr>
-            </div>
-          </div>
+      <div class="row justify-content-md-center">
+        <div class="col col-lg-6">
+          <h1 class="mb-3">Securing Your Career Path</h1>
+          <h2 class="mb-4">with  Job Automation Risk Prediction</h2>
         </div>
-        <div class="row justify-content-md-center">
-          <div class="col">
-            <div class="bd-callout bd-callout-warning">
-              <h5>Warning</h5>
-              <p>Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-              <ol class="list-group list-group-numbered">
-                {% for title, risk in result.recommended_jobs.items %}
-                <li class="list-group-item d-flex justify-content-between align-items-start">
-                  <div class="ms-2 me-auto">
-                    <div class="fw-bold">{{title}}</div>
-                  </div>
-                  <span class="badge bg-primary rounded-pill">{{ risk }}</span>
-                </li>
-                {% endfor %}
-              </ol>
-            </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <div class="bd-callout bd-callout-info">
-              <h5>Info</h5>
-            
-              <button type="button" class="btn btn-info">Inf adsf asdf adsf </button>
-              <button type="button" class="btn btn-info">asdf adf asdfad</button>
-              <button type="button" class="btn btn-info">asdf</button>
-            </div>
-          </div>
       </div>
+      <div class="row justify-content-md-center">
+        <div class="col col-lg-6">
+          {% if result.risk_index > 70 %}
+          <div class="alert alert-danger" role="alert">
+            <div class="row">
+              <div class="col">
+                <p>Estimated risk of automation:</p>
+                <h4 class="alert-heading"> {{result.risk_index}} &#37;</h4>                
+              <p class="mb-0">Hight Risk</p>
+            </div>
+            <div class="col">
+              <img src="{% static 'risk_check/images/hight.png' %}" alt="High Risk" class="rounded mx-auto d-block">
+            </div>
+          </div>
+          {% elif result.risk_index > 40 %}
+          <div class="alert alert-info" role="alert">
+            <div class="row">
+              <div class="col">
+                <p>Estimated risk of automation:</p>
+                <h4 class="alert-heading"> {{result.risk_index}} &#37;</h4>                
+              <p class="mb-0">Moderate Risk</p>
+            </div>
+            <div class="col">
+              <img src="{% static 'risk_check/images/moderate.png' %}" alt="Moderate Risk" class="rounded mx-auto d-block">
+            </div>
+          </div>
+          {% else %}
+          <div class="alert alert-success" role="alert">
+            <div class="row">
+              <div class="col">
+                <p>Estimated risk of automation:</p>
+                <h4 class="alert-heading"> {{result.risk_index}} &#37;</h4>                
+              <p class="mb-0">Low Risk</p>
+            </div>
+            <div class="col">
+              <img src="{% static 'risk_check/images/low.png' %}" alt="Low Risk" class="rounded mx-auto d-block">
+            </div>
+          </div>
+          {% endif %}
+            </div>
+          </div>
+          <hr>
+        </div>
+        <div class="row justify-content-md-center">
+          <div class="col col-lg-6">
+            <div class="bd-callout bd-callout-warning">
+              <h5>Recommended Job Title</h5>
+                <p>According to you skill, following position are suggested to apply.</p>
+                <ol class="list-group list-group-numbered">
+                  {% for title, risk in result.recommended_jobs.items %}
+                  <li class="list-group-item d-flex justify-content-between align-items-start">
+                    <div class="ms-2 me-auto">
+                      <div class="fw-bold">{{title}}</div>
+                    </div>
+                    <span class="badge bg-primary rounded-pill">{{ risk }}</span>
+                  </li>
+                  {% endfor %}
+                </ol>
+                
+              </div>
+          </div>
+        </div>
+        <hr>
+        <div class="row justify-content-md-center">
+          <div class="col col-lg-6">
+            <div class="d-grid gap-2 d-md-block">
+              <h5>Matched skills</h5>
+              {{matched_skills}}
+              {% if result.result.matched_skills %}
+                {% for title in result.matched_skills %}
+                  <button type="button" class="btn btn-outline-success p-2 m-1">{{title|truncatechars:40}}</button>
+                {% endfor %}
+              {% else %}
+                <p>No matched skills found.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <hr>
+        <div class="row justify-content-md-center">
+          <div class="col col-lg-6">
+            <div class="d-grid gap-2 d-md-block">
+              <h5>Recommended skills</h5>
+              {% for title in result.recommended_skills %}
+                <button type="button" class="btn btn-outline-success p-2 m-1">{{title|truncatechars:40}}</button>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        <hr>
+    </div>
   </body>
 </html>
 
