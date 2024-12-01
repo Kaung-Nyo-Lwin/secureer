@@ -23,7 +23,7 @@ EXPOSE 8000
 
 # Run migrations and start the Django development server
 
-RUN python manage.py migrate --noinput
+# RUN python manage.py migrate --noinput
 
 #RUN python manage.py collectstatic --noinput
 
