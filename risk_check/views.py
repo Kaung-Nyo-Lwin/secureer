@@ -73,6 +73,8 @@ def check(request):
     for title, skills in zip(recommended_titles, recommended_skills):
         recommended_job_risk[title] = calculate_job_risk(title, skills)
 
+    recommended_job_risk = {k: v for k, v in sorted(recommended_job_risk.items(), key=lambda item: item[1])}
+
     print(recommended_job_risk)
 
     # job post recommendation
