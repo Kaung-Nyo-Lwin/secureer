@@ -1,0 +1,54 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description"
+              content="Explore automation exposure, discover related careers, and find skills to develop. A research project grounded in Myanmar’s job market.">
+        <meta name="theme-color" content="#244a3c">
+        <title>{% block title %}Secureer — Move your career forward{% endblock %}</title>
+        <link rel="icon"
+              href="{% static 'risk_check/images/mark.svg' %}"
+              type="image/svg+xml">
+        <link rel="stylesheet" href="{% static 'risk_check/css/app.css' %}">
+        <script src="{% static 'risk_check/js/app.js' %}" defer></script>
+    </head>
+    <body>
+        <a class="skip-link" href="#main">Skip to content</a>
+        <header class="site-header">
+            <div class="shell header-inner">
+                <a class="brand" href="{% url 'index' %}" aria-label="Secureer home">
+                    <svg class="brand-mark" viewBox="0 0 36 36" aria-hidden="true">
+                        <rect width="36" height="36" rx="11" fill="currentColor" />
+                        <path d="M10 24V14h6v10M20 24V10h6v14" fill="none" stroke="#e2f4b5" stroke-width="3" stroke-linecap="round" />
+                        <path d="m11 12 5-4m5 19 5-4" stroke="#e2f4b5" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                    secureer<span class="brand-dot">.</span>
+                </a>
+                <nav aria-label="Main navigation">
+                    <a href="{% url 'index' %}"
+                       {% if active_page == 'assessment' %}aria-current="page"{% endif %}>Assessment</a>
+                    <a href="{% url 'example' %}"
+                       {% if active_page == 'example' %}aria-current="page"{% endif %}>Example report</a>
+                    <a href="{% url 'about' %}"
+                       {% if active_page == 'research' %}aria-current="page"{% endif %}>The research <span aria-hidden="true">↗</span></a>
+                </nav>
+                <span class="project-label"><span class="status-dot"></span> A machine learning project</span>
+            </div>
+        </header>
+        <main id="main" class="shell">
+            {% block content %}{% endblock %}
+        </main>
+        <footer class="site-footer shell">
+            <div>
+                <a class="footer-brand" href="{% url 'index' %}">secureer.</a>
+                <span>A little clarity for your next chapter.</span>
+            </div>
+            <div class="footer-links">
+                <span>Built from research. Made for exploration.</span>
+                <a href="{% url 'about' %}#privacy">Privacy &amp; data</a>
+            </div>
+        </footer>
+    </body>
+</html>

@@ -1,0 +1,6 @@
+-r requirements.txt
+# Optional semantic pipeline. Use Python 3.12; no archived pickle is loaded.
+sentence-transformers==6.1.0
+scikit-learn==1.9.1
+numpy==2.5.3
+torch==2.14.1

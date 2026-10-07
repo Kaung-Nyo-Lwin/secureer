@@ -1,155 +1,182 @@
-# Secureer - Job Automation Risk Assessment Platform
+# Secureer
 
-A web-based platform that helps users assess their job automation risk and provides personalized job and skill recommendations using machine learning.
+**A little clarity for your next chapter.**
 
-## Features
+Secureer connects automation exposure research with career exploration. Enter a role and a few skills to compare your occupation with historical references, discover related roles in Myanmar’s job market, and identify skills to develop.
 
-- Job automation risk assessment
-- Skill-based job recommendations
-- Personalized skill recommendations
-- Job posting recommendations
-- User skill management
-- Interactive web interface
+Originally developed for the **AT82.03 Machine Learning** course at the **Asian Institute of Technology in 2024**, this portfolio edition brings the research into a complete, approachable web application.
 
-## Project Structure
+![Secureer landing page with career assessment form](docs/images/home-desktop.png)
 
+## Explore the project
+
+- **Assessment:** a short profile form with optional first name, skill suggestions, validation, and useful error messages.
+- **Career report:** an explained exposure index, five related roles when matches exist, shared skills, and additional skills to explore.
+- **Example report:** a public sample that works without submitting or storing personal information.
+- **Research page:** the methodology, dataset provenance, interpretation limits, and data handling explained in plain language.
+- **Responsive interface:** desktop and mobile layouts, keyboard access, reduced-motion support, and a print layout for saving reports as PDF.
+- **Private report access:** personal reports belong to the browser session that created them and can be deleted from the results page.
+
+## Try it locally
+
+Use **Python 3.10 or later**. Python 3.12 is recommended if you also want to run the semantic ML mode.
+
+From the repository directory:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
 ```
-├── admin/                  # Django admin configuration
-├── ml_models/             # Machine learning model files
-├── risk_check/            # Main application
-│   ├── models.py          # Database models
-│   ├── views.py           # Application views
-│   ├── utils.py           # Utility functions
-│   ├── templates/         # HTML templates
-│   └── static/           # Static files
-├── Dockerfile             # Container configuration
-└── docker-compose.yml     # Container orchestration
+
+On Windows, activate the environment with `.venv\Scripts\activate`.
+
+Open [localhost:8000](http://127.0.0.1:8000/). The [example report](http://127.0.0.1:8000/example/) is a quick way to see the result format.
+
+The default **offline reference demo** needs no model download, API key, seeded database, or frontend build. It uses the three bundled CSV files and Python’s standard library for matching. Application data is stored in `var/db.sqlite3`; the original class-project database is not used.
+
+### Docker
+
+```bash
+docker compose up --build
 ```
 
-## Technology Stack
+Open [localhost:8000](http://127.0.0.1:8000/). Compose binds to localhost and stores assessment data in a named volume. The image runs migrations at startup, serves static assets with WhiteNoise, and starts Gunicorn as a non-root user.
 
-- **Backend Framework:** Django
-- **Database:** SQLite
-- **ML Libraries:**
-  - scikit-learn
-  - sentence-transformers
-  - PyTorch
-  - transformers
-- **Frontend:** Bootstrap 5
-- **Deployment:** Docker
+```bash
+docker compose down
+```
 
-## Key Components
+The named volume survives a normal shutdown.
 
-### Models
+## Demo and semantic ML modes
 
-1. **User**
-   - Stores user information and skills
-   - Manages user profiles and skill sets
+| | Offline reference demo | Semantic ML |
+|---|---|---|
+| Enable | Default: `SECUREER_ENGINE=demo` | `SECUREER_ENGINE=ml` |
+| Title comparison | Normalized keyword overlap | MiniLM embeddings + 20 K-means clusters |
+| Exposure index | Historical score of the closest occupation reference | Average of the occupation-cluster score and skill bottleneck distance |
+| Career matching | Inverse-frequency weighted keyword cosine similarity | Five nearest neighbors in skill embedding space |
+| First use | No downloads | Downloads MiniLM weights and fits the pipeline |
+| Unknown titles | No score when the reference match is weak | Experimental semantic comparison |
 
-2. **Skill**
-   - Maintains skill database
-   - Used for matching and recommendations
+The demo’s score depends on the title; skills affect its career suggestions. Both modes display an **index out of 100**, with its method identified on the report. Neither establishes a personal probability of job loss. See the [model card](docs/MODEL_CARD.md) for formulas and limitations.
 
-3. **Result**
-   - Stores assessment results
-   - Contains risk indices and recommendations
+### Run the semantic pipeline
 
-4. **Post**
-   - Manages job postings
-   - Tracks reach and click metrics
+In a Python 3.12 environment:
 
-## Installation
+```bash
+python -m pip install -r requirements-ml.txt
+SECUREER_ENGINE=ml python manage.py runserver
+```
 
-### Using Docker (Recommended)
+For a smaller CPU-only installation on Linux, install PyTorch first:
 
-1. Clone the repository:
-   ```bash
-   git clone [git_url]
-   cd secureer
-   ```
+```bash
+python -m pip install torch==2.14.1 --index-url https://download.pytorch.org/whl/cpu
+python -m pip install -r requirements-ml.txt
+```
 
-2. Build and start the containers:
-   ```bash
-   docker-compose up --build
-   ```
+The first ML assessment can take longer while model weights download and 702 occupation titles and 872 skill descriptions are encoded. The fitted engine is reused within each server process. The homepage, example report, migrations, and saved reports do not require ML initialization.
 
-### Local Development Setup
+The archived `recommender_model` was fitted on **878 rows**, while the bundled career CSV contains **872 rows**. Loading it against that CSV would misalign recommendation indices. The application therefore fits K-means and nearest neighbors directly on the current bundled rows, using the original algorithm choices. Archived pickle files remain research artifacts and are not loaded by the app.
 
-1. Clone the repository:
-   ```bash
-   git clone [git_url]
-   cd secureer
-   ```
+The standard Docker image contains the offline demo dependencies. Build a separate image with the ML requirements if deploying semantic mode, and allow additional startup time and memory.
 
-2. Create and activate virtual environment:
-   ```bash
-   # Using virtualenv
-   virtualenv2 --no-site-packages env
-   source env/bin/activate
+## How it is built
 
-   # Or using conda
-   conda env create -f environment.yml
-   conda activate your_environment_name
-   ```
+```mermaid
+flowchart LR
+    A[Role and skills] --> B[Django form validation]
+    B --> C{Assessment engine}
+    C --> D[Offline reference matching]
+    C --> E[MiniLM + K-means + nearest neighbors]
+    D --> F[Report snapshot]
+    E --> F
+    F --> G[SQLite + browser session]
+    G --> H[Career report / print / delete]
+    I[Bundled research CSVs] --> D
+    I --> E
+```
 
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+The web app uses **Django 5.2**, **SQLite**, and local **HTML, CSS, and JavaScript**. **Gunicorn** and **WhiteNoise** handle container serving. Optional ML dependencies are **sentence-transformers**, **scikit-learn**, **NumPy**, and **PyTorch**. The interface works without JavaScript; local enhancements add skill buttons, submission feedback, and printing.
 
-4. Run migrations and start server:
-   ```bash
-   python manage.py migrate
-   python manage.py runserver
-   ```
+```text
+admin/                       Django settings and application entry points
+risk_check/
+  forms.py                   Profile validation and skill normalization
+  services.py                Demo and semantic assessment engines
+  views.py                   Assessment, report ownership, and deletion
+  models.py                  Profiles, skills, and saved report snapshots
+  templates/                 Landing page, report, research, and error pages
+  static/risk_check/          Local styles, scripts, and branding
+  tests.py                   Assessment and privacy regression coverage
+ml_models/                   Bundled datasets and archived research models
+docs/                        Model card, deployment guide, and screenshots
+scripts/browser_smoke.py      Browser interactions and screenshot capture
+.github/workflows/           Application CI and manual container publishing
+```
 
-5. Navigate to `http://127.0.0.1:8000/risk_check/`
+## Research data
 
-## Usage
+| File | Included records | Purpose |
+|---|---:|---|
+| `ml_models/df_processed.csv` | 872 job titles | MyJob career and skill examples prepared for the 2024 project |
+| `ml_models/df_title_risk.csv` | 702 occupations | Frey and Osborne historical computerisation references |
+| `ml_models/df_skill.csv` | 9 descriptions | O*NET automation bottleneck variables used in ML mode |
 
-1. Access the web interface
-2. Enter your:
-   - Name
-   - Current position
-   - Skills
-3. Get personalized results:
-   - Automation risk score
-   - Recommended jobs
-   - Suggested skills
-   - Relevant job postings
+The data is a historical snapshot, and some titles and skill labels retain source inconsistencies. Career matches are examples rather than current vacancies. The original notebook documents the research process; its raw-data paths refer to the original development environment and are not required to run the app.
 
-## Machine Learning Components
+Original project materials:
 
-- Job automation risk calculation
-- Skill-based job matching
-- Job recommendation system
-- Skill gap analysis
+- [Model development notebook](Job_Automation_Risk_Prediction.ipynb)
+- [Academic report](Job_Automation_Risk_Prediction_and_job_recommender_system.pdf)
+- [Presentation](Job_Automation_Risk_Prediction_and_job_recommender_system_presentation.pdf)
+- [Original demo video](demo_vedio.mp4)
 
-## Documentation
+## Checks and screenshots
 
-- Jupyter notebook with model development: `Job_Automation_Risk_Prediction.ipynb`
-- PDF documentation: `Job_Automation_Risk_Prediction_and_job_recommender_system.pdf`
-- Presentation: `Job_Automation_Risk_Prediction_and_job_recommender_system_presentation.pdf`
-- Video demonstration: `demo_vedio.mp4`
+```bash
+python manage.py check
+python manage.py makemigrations --check --dry-run
+python manage.py collectstatic --noinput
+python manage.py test
+```
 
-## Abstract
+The regression suite covers profile validation, deterministic demo results, unknown inputs, saved snapshots, session ownership, CSRF protection, escaped user content, report deletion, and the full 0–100 score range. CI runs the web suite on Python 3.10, 3.12, and 3.14 and builds the demo container.
 
-The increasing trend of computerization poses significant risks to the global job
-market, particularly for roles that involve repetitive tasks. This project examines
-the impact of computerization on the Myanmar job market using data sponsored
-by MyJob, one of Myanmar's pioneer online job platforms, classifying job roles
-based on their susceptibility to computerization. The project is grounded in Frey
-and Osborne’s framework [1], which assigns probabilities to occupations based
-on their likelihood of computerization. We develop a job recommender system
-to assist individuals in exploring low-risk career paths and offer insights for
-educational institutions and policymakers aiming to prepare the workforce for
-an AI-driven economy.
+To reproduce the desktop/mobile browser checks and screenshots, start the demo server in another terminal, then run:
 
-## Future Improvements
+```bash
+python -m pip install playwright
+python -m playwright install chromium
+python scripts/browser_smoke.py
+```
 
-1. Enhanced ML model accuracy
-2. Real-time job market data integration
-3. User feedback system
-4. Advanced analytics dashboard
-5. API endpoint development
-6. Mobile application development
+Set `SECUREER_URL` to use a different local port. The script checks the homepage, example, and research page at 320, 390, 768, and 1440 pixels, exercises the assessment flow with and without JavaScript, and deletes its sample assessments afterward.
+
+[Desktop report](docs/images/report-desktop.png) · [Mobile landing page](docs/images/home-mobile.png)
+
+## Configuration and deployment
+
+Local development uses sensible defaults. For custom settings, copy `.env.example` and export its variables. Django itself does not automatically read `.env` files; Docker Compose reads `.env` for variable substitution.
+
+```bash
+cp .env.example .env
+set -a
+source .env
+set +a
+```
+
+A public deployment needs a generated secret key, explicit allowed hosts, HTTPS settings, persistent storage, and a data retention policy. See the [deployment guide](docs/DEPLOYMENT.md) for the complete configuration.
+
+GitHub Actions checks pushes and pull requests. The **Publish container** workflow runs manually and publishes to the repository’s GitHub Container Registry; it does not redeploy the former class-project hosting account.
+
+## Project credits
+
+Original academic team: **Kaung Nyo Lwin, Nyein Chan Aung, Phone Myint Naing, and Khin Yadanar Hlaing**. Submitted to **Dr. Chaklam Silpasuwanchai**, Asian Institute of Technology.
+
+The original report credits **MyJob** for the Myanmar job data and **Frey and Osborne** and **O*NET** for the research framework. The portfolio edition retains the original materials and makes the application’s assumptions and behavior easier to inspect.

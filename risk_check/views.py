@@ -1,128 +1,159 @@
-from django.http import HttpResponse
-from django.template import loader
-from .models import Skill, Result, User, Post
-from django.shortcuts import render
-from django.http import Http404
-from django.shortcuts import get_object_or_404, render
+import logging
 
-from django.db.models import F
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
-from django.urls import reverse
+from django.conf import settings
+from django.db import transaction
+from django.http import Http404, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.views.decorators.cache import never_cache
+from django.views.decorators.debug import sensitive_post_parameters
+from django.views.decorators.http import require_GET, require_POST
 
-import json
-# Create your views here.
+from .forms import AssessmentForm
+from .models import Result, Skill, User
+from .services import AssessmentUnavailable, assess
 
-# Models
-from .utils import recommend_job, calculate_job_risk, recommend_job_posts
+logger = logging.getLogger(__name__)
 
 
+def home_context(form=None):
+    return {
+        "form": form if form is not None else AssessmentForm(),
+        "engine": settings.SECUREER_ENGINE,
+        "active_page": "assessment",
+    }
+
+
+@require_GET
 def index(request):
-    skills_data = Skill.objects.all()  # Get model instances
-    # formatted_skills_data = [
-    #     {"value": skill.skill_name } for skill in skills_data
-    # ]
-    formatted_skills_data= []
-    for skills in skills_data:
-        formatted_skills_data.append(skills.skill_name)
-    return render(request, "risk_check/index.html", {'skills_data': formatted_skills_data})
-    # return render(request, "risk_check/index.html", context)
+    return render(request, "risk_check/index.html", home_context())
 
-# def results(request, result_id):
-#     response = "You're looking at the results of question %s."
-#     return HttpResponse(response % result_id)
 
-# def check(request, result_id):
-#     return HttpResponse("You're voting on question %s." % result_id)
+@require_GET
+def about(request):
+    return render(request, "risk_check/about.html", {"active_page": "research"})
 
-# def index(request):
-#     latest_question_list = Skill.objects.order_by("pub_date")[:5]
-#     output = ", ".join([q.question_text for q in latest_question_list])
-#     return HttpResponse(output)
 
-def detail(request, result_id):
-    result = get_object_or_404(Result, pk=result_id)
-    print(result)
-    recommended_job_posts = recommend_job_posts(result.recommended_jobs)
-    print(recommended_job_posts)
-    return render(request, "risk_check/result.html", {'result': result, 'recommended_job_posts': recommended_job_posts})
-    #return render(request, "risk_check/detail.html", {"result": result})
+@require_GET
+def example(request):
+    report = assess(
+        "Marketing Manager",
+        [
+            "Digital marketing",
+            "Market Research",
+            "Content writing skills",
+            "Communication Skills",
+        ],
+        "demo",
+    )
+    return render(
+        request,
+        "risk_check/result.html",
+        {
+            "report": report,
+            "display_name": "Alex",
+            "is_example": True,
+            "active_page": "example",
+        },
+    )
 
+
+@require_POST
+@sensitive_post_parameters("user_name", "position", "skills")
 def check(request):
-    # create a new user
-    #skills = Skill.objects.get(pk=request.POST["skill"])
-    # print(list(request.POST.items()))
-    user_name = request.POST['user_name']
-    position = request.POST['position']
-    skills_string = json.loads(request.POST.get('skills'))
-    skills = list()
-    for skill in skills_string:
-        skills.append(skill['value'])
-
-    final_skills = ' and '.join(skills)
-
-    # job risk
-    current_job_risk = calculate_job_risk(position, final_skills)
-    current_job_risk = current_job_risk*100
-    print(current_job_risk)
-
-    # recommendation
-    recommended_titles, recommended_skills = recommend_job(final_skills)
-    recommended_job_risk = dict()
-    for title, skills in zip(recommended_titles, recommended_skills):
-        recommended_job_risk[title] = calculate_job_risk(title, skills)
-
-    recommended_job_risk = {k: v for k, v in sorted(recommended_job_risk.items(), key=lambda item: item[1])}
-
-    print(recommended_job_risk)
-
-    # job post recommendation
-    recommended_job_posts = recommend_job_posts(recommended_titles)
-    print(recommended_job_posts)
-
-    created_at = timezone.now()
-    user = User(user_name = user_name, position = position, created_at = created_at)
-    user.save()
-    #user.skills.add(request.POST['skills'])
-    skills_string = json.loads(request.POST.get('skills'))
-    
-    matched_skills = list()
-
-    for skills in skills_string:
-        #skills = json.loads(skills)
-        skill, created = Skill.objects.get_or_create(skill_name=skills['value'])
-        user.skills.add(skill)
-        if skills['value'] in recommended_skills:
-            matched_skills.append(skill)
-        print(matched_skills)
-    user_id = user.pk
-    # save to result
-
-    result = Result(user_id = user_id, 
-                    recommended_skills = recommended_skills, 
-                    recommended_jobs = recommended_job_risk,
-                    risk_index = current_job_risk
-                    )
-    result.save()
-    
-    matched_skills = Skill.objects.filter(skill_name__in=matched_skills)
-    result.matched_skills.add(*matched_skills)
-
-    # for title in recommended_titles:
-    #     #skills = json.loads(skills)
-    #     skill, created = Skill.objects.get_or_create(skill_name=title)
-    #     result.matched_skills.add(skill)
-    #     matched_skills.append(skill)
-
-    result_id = result.pk
-
-    # result = Result(user_id = user_id, risk_index = 1, job_poll = 1, avg_salary = 1, industrial_risk_index = 1)
-    # result.save()
-    # result_id = result.pk
-    
-    return HttpResponseRedirect(reverse("result", args=(result_id,)))
-    #return render(request, "risk_check/detail.html", {"result": result_id})
+    form = AssessmentForm(request.POST)
+    if not form.is_valid():
+        return render(request, "risk_check/index.html", home_context(form), status=400)
+    profile = form.cleaned_data
+    try:
+        report = assess(profile["position"], profile["skills"])
+    except AssessmentUnavailable:
+        logger.exception("Assessment engine unavailable")
+        form.add_error(
+            None,
+            "The analysis engine is temporarily unavailable. Please try again later, or explore the example report.",
+        )
+        return render(request, "risk_check/index.html", home_context(form), status=503)
+    with transaction.atomic():
+        user = User.objects.create(
+            user_name=profile["user_name"] or "Explorer",
+            position=profile["position"],
+            created_at=timezone.now(),
+        )
+        selected_skills = []
+        for name in profile["skills"]:
+            skill, _ = Skill.objects.get_or_create(skill_name=name)
+            selected_skills.append(skill)
+        user.skills.set(selected_skills)
+        result = Result.objects.create(
+            user=user,
+            risk_index=report["risk"]["score"],
+            analysis=report,
+            recommended_skills=report["suggested_skills"],
+            recommended_jobs={
+                job["title"]: (
+                    job["risk"]["score"] / 100
+                    if job["risk"]["score"] is not None
+                    else None
+                )
+                for job in report["jobs"]
+            },
+        )
+        result.matched_skills.set(
+            [
+                skill
+                for skill in selected_skills
+                if skill.skill_name in report["matched_skills"]
+            ]
+        )
+    request.session["result_ids"] = (
+        request.session.get("result_ids", []) + [result.pk]
+    )[-20:]
+    return redirect("result", result_id=result.pk)
 
 
+def owned_result(request, result_id):
+    if result_id not in request.session.get("result_ids", []):
+        raise Http404("This report is not available in this browser session.")
+    return get_object_or_404(Result.objects.select_related("user"), pk=result_id)
 
+
+@require_GET
+@never_cache
+def detail(request, result_id):
+    result = owned_result(request, result_id)
+    response = render(
+        request,
+        "risk_check/result.html",
+        {
+            "report": result.analysis,
+            "display_name": result.user.user_name,
+            "result": result,
+            "active_page": "assessment",
+        },
+    )
+    response["X-Robots-Tag"] = "noindex, nofollow"
+    return response
+
+
+@require_POST
+def delete_result(request, result_id):
+    result = owned_result(request, result_id)
+    with transaction.atomic():
+        skill_ids = list(result.user.skills.values_list("id", flat=True))
+        result.user.delete()
+        Skill.objects.filter(
+            id__in=skill_ids,
+            user__isnull=True,
+            matched_skills__isnull=True,
+            post_skills__isnull=True,
+        ).delete()
+    request.session["result_ids"] = [
+        pk for pk in request.session.get("result_ids", []) if pk != result_id
+    ]
+    return redirect("index")
+
+
+@require_GET
+def health(request):
+    return JsonResponse({"status": "ok", "engine": settings.SECUREER_ENGINE})

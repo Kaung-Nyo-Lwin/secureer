@@ -1,106 +1,113 @@
-{% comment %} <!doctype html>
-<html lang="en-US">
-  <head>
-    <meta charset="utf-8" />
-    <title>My test page</title>
-  </head>
-  <body>
-    {% if skill_list %}
-    <ul>
-    {% for skill in skill_list %}
-        <li>{{ skill.skill_name }}</a></li>
-    {% endfor %}
-    </ul>
-    {% else %}
-        <p>No skills are available.</p>
-    {% endif %}
-    <form action="{% url 'check' %}" method="post">
-        {% csrf_token %}
-        <input type="text" name="user_name" id="user_name" placeholder="Name">
-        <input type="text" name="position" id="position", placeholder="Position">
-        <fieldset>
-            <legend><h1>Skill</h1></legend>
-            {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-            
-            {% for choice in skill_list %}
-                <input type="checkbox" name="skill" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
-                <label for="choice{{ forloop.counter }}">{{ choice.skill_name }}</label><br>
-            {% endfor %}
-        </fieldset>
-        <input type="submit" value="Check">
-        </form>
-    
-  </body>
-</html>
- {% endcomment %}
-
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Job/Skill Form</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css">
-</head>
-<body>
-    <div class="container">
-        <div class="row justify-content-md-center">
-            <div class="col col-lg-6">
-                <img src="{% static 'risk_check/images/logo-dark.png' %}" width="100px" alt="Logo" class="rounded mx-auto d-block float-end">
-                <h1 class="mb-3">Securing Your Career Path</h1>
-                <h3 class="mb-4">with  Job Automation Risk Prediction</h3>
+{% extends "risk_check/base.html" %}
+{% block content %}
+    <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+            <p class="eyebrow"><span class="small-spark" aria-hidden="true">✳</span> YOUR NEXT CHAPTER STARTS HERE</p>
+            <h1 id="hero-title">
+                The future of work.
+                <br>
+                Your way <em>forward.</em>
+            </h1>
+            <p class="hero-description">Understand how automation connects to your role. Discover where your skills could take you next.</p>
+            <div class="hero-benefits">
+                <span><span class="checkmark" aria-hidden="true">✓</span> Understand your exposure</span>
+                <span><span class="checkmark" aria-hidden="true">✓</span> Explore career possibilities</span>
+                <span><span class="checkmark" aria-hidden="true">✓</span> Find your next skill</span>
+            </div>
+            <a class="text-link"
+               href="{% url 'example' %}">Take a look at an example report <span aria-hidden="true">↗</span></a>
+            <div class="journey"
+                 aria-label="Your skills can open several possible career paths">
+                <div class="journey-top"><span>YOUR CAREER IS A PATH, NOT A PREDICTION.</span><span aria-hidden="true">↗</span></div>
+                <svg viewBox="0 0 500 158"
+                     role="img"
+                     aria-label="A path from your skills branches into new possibilities">
+                    <defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#d7dfd1" /></pattern></defs>
+                    <rect width="500" height="158" fill="url(#dots)" />
+                    <path d="M50 110H175Q220 110 246 79T325 48H450" fill="none" stroke="#335b46" stroke-width="2" />
+                    <path d="M175 110Q220 110 255 117T370 118H450" fill="none" stroke="#a8b79a" stroke-width="2" stroke-dasharray="5 5" />
+                    <circle cx="50" cy="110" r="18" fill="#e6eedf" /><circle cx="50" cy="110" r="6" fill="#335b46" />
+                    <circle cx="285" cy="58" r="7" fill="#fff" stroke="#335b46" stroke-width="2" />
+                    <circle cx="449" cy="48" r="19" fill="#d9ecac" />
+                    <path d="m442 48 5 5 9-10" fill="none" stroke="#335b46" stroke-width="2" />
+                    <circle cx="449" cy="118" r="5" fill="#a8b79a" />
+                    <text x="27" y="74" fill="#4f6657" font-size="12">Your skills</text><text x="308" y="24" fill="#4f6657" font-size="12">New possibilities</text>
+                </svg>
+                <div class="journey-bottom"><span class="mini-dot"></span> Small steps. More possibilities.</div>
             </div>
         </div>
-    
-        <div class="row justify-content-md-center">
-            <div class="col col-lg-6">
-                <form action="{% url 'check' %}" method="post">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Name</label>
-                        <input type="text" class="form-control" id="" name="user_name" placeholder="Enter your name" required>
+        <div class="assessment-card" id="assessment">
+            <div class="card-heading"><span class="section-index">01 / YOUR PROFILE</span><span class="pill subtle">No account needed</span></div>
+            <h2>Start with where you are.</h2>
+            <p class="muted">A role, a few skills, a fresh perspective.</p>
+            {% if form.errors %}<div class="form-alert" role="alert" tabindex="-1" id="form-errors"><strong>Let’s check a few details.</strong>{{ form.non_field_errors }}{% if not form.non_field_errors %}<p>Review the highlighted fields below.</p>{% endif %}</div>{% endif %}
+            <form action="{% url 'check' %}" method="post" id="assessment-form">
+                {% csrf_token %}
+                <div class="field {% if form.user_name.errors %}has-error{% endif %}">
+                    <label for="{{ form.user_name.id_for_label }}">First name <span class="optional">Optional</span></label>
+                    {{ form.user_name }}{{ form.user_name.errors }}
+                </div>
+                <div class="field {% if form.position.errors %}has-error{% endif %}">
+                    <label for="{{ form.position.id_for_label }}">Current or recent role</label>
+                    {{ form.position }}{{ form.position.errors }}
+                </div>
+                <div class="field {% if form.skills.errors %}has-error{% endif %}">
+                    <label for="{{ form.skills.id_for_label }}">Your skills <span class="optional">Up to 20</span></label>
+                    {{ form.skills }}{{ form.skills.errors }}
+                    <p class="field-help" id="skills-help">Separate each skill with a comma.</p>
+                    <div class="skill-suggestions" data-enhanced hidden>
+                        <span>Try adding</span><button type="button" data-skill="Communication">+ Communication</button><button type="button" data-skill="Leadership">+ Leadership</button><button type="button" data-skill="Python">+ Python</button>
                     </div>
-                    <div class="mb-3">
-                        <label for="position" class="form-label">Position</label>
-                        <input type="text" class="form-control" id="position" name="position" placeholder="Enter your position" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="skills" class="form-label">Skills</label>
-                        <input type="text" class="form-control" id="skills" name="skills" placeholder="Enter your skills" required>
-                    </div>
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="jobCheck" name="looking_for_job">
-                        <label class="form-check-label" for="jobCheck">I'm looking for a job</label>
-                    </div>
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="skillCheck" name="improve_skill">
-                        <label class="form-check-label" for="skillCheck">I want to improve my skill</label>
-                    </div>
-                    <div class="mb-3">
-                      <i>By submitting the form you agree to our <a href="google.com" target="blank">privacy policy.</a></i>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                </form>
-            </div>
+                </div>
+                <button type="submit"
+                        class="button primary full-width"
+                        id="submit-assessment"><span>Explore my career</span><span aria-hidden="true">↗</span></button>
+                <p class="loading-message"
+                   id="loading-message"
+                   role="status"
+                   hidden>Finding connections in your profile. The first ML analysis may take a little longer.</p>
+                <div class="form-reassurance"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="5" y="8" width="10" height="9" rx="2" /><path d="M7 8V5a3 3 0 0 1 6 0v3" /></svg><span>Visible only in this browser session. <a href="{% url 'about' %}#privacy">About your data</a></span></div>
+            </form>
+            <div class="form-mode"><span class="status-dot"></span>{% if engine == "ml" %}Semantic ML model{% else %}Offline reference demo{% endif %}<a href="{% url 'about' %}#methodology">How it works <span aria-hidden="true">↗</span></a></div>
         </div>
-    </div>
-</body>
-<script>
-    // Initialize Tagify on the skills input
-    const skillsData = {{ skills_data|safe }}
-    const skillsInput = document.getElementById('skills');
-    const tagify = new Tagify(skillsInput, {
-        whitelist: skillsData,
-        dropdown: {
-            maxItems: 10, // Maximum items to show in the suggestions dropdown
-            enabled: 0, // Show suggestions immediately
-        },
-    });
-</script>
-</html>
-
+    </section>
+    <section class="research-strip" aria-label="Research dataset overview">
+        <div class="strip-intro">
+            <span class="eyebrow">GROUNDED IN RESEARCH</span>
+            <p>
+                A local perspective.
+                <br>
+                A broader view of work.
+            </p>
+        </div>
+        <div class="stat"><strong>872</strong><span>job titles in the dataset</span></div>
+        <div class="stat"><strong>702</strong><span>occupation references</span></div>
+        <div class="stat"><strong>9</strong><span>automation bottlenecks</span></div>
+        <div class="dataset-note">
+            <span class="pill">MYANMAR · 2024</span>
+            <p>
+                Historical data.
+                <br>
+                New conversations.
+            </p>
+        </div>
+    </section>
+    <section class="how-section" id="how-it-works" aria-labelledby="how-title">
+        <div class="section-heading"><div><p class="eyebrow">FROM INSIGHT TO POSSIBILITY</p><h2 id="how-title">A clearer picture of what comes next.</h2></div><a class="text-link" href="{% url 'about' %}">Behind the project <span aria-hidden="true">↗</span></a></div>
+        <div class="steps-grid">
+            <article class="step"><span class="step-number">01</span>
+                <h3>See the bigger picture</h3>
+                <p>Compare your role with historical research on occupational automation exposure.</p>
+            </article>
+            <article class="step"><span class="step-number">02</span>
+                <h3>Connect the dots</h3>
+                <p>Explore roles from the Myanmar job dataset that connect with the skills you already have.</p>
+            </article>
+            <article class="step"><span class="step-number">03</span>
+                <h3>Choose a next step</h3>
+                <p>Find skills that appear in related roles and turn your curiosity into a learning plan.</p>
+            </article>
+        </div>
+    </section>
+    <aside class="context-note"><span aria-hidden="true">ⓘ</span><p>A starting point for exploration. Scores reflect historical research and experimental methods, not a prediction of your job’s future. <a href="{% url 'about' %}#limitations">Understand the limitations.</a></p></aside>
+{% endblock %}

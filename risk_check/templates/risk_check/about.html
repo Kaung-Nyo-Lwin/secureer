@@ -1,0 +1,96 @@
+{% extends "risk_check/base.html" %}
+{% block title %}The research behind Secureer{% endblock %}
+{% block content %}
+    <section class="about-hero">
+        <p class="eyebrow">THE RESEARCH BEHIND SECUREER</p>
+        <h1>
+            Better questions about
+            <br>
+            the <em>future of work.</em>
+        </h1>
+        <p class="hero-description">An academic machine learning project exploring occupational automation exposure and career connections in Myanmar.</p>
+        <div class="tags"><span class="tag">Asian Institute of Technology</span><span class="tag">Machine Learning · 2024</span><span class="tag">Django + sentence embeddings</span></div>
+    </section>
+    <div class="about-layout">
+        <nav class="about-nav" aria-label="On this page">
+            <a href="#purpose">The question</a><a href="#methodology">How it works</a><a href="#data">The data</a><a href="#limitations">What it can tell us</a><a href="#privacy">Privacy &amp; data</a>
+        </nav>
+        <div class="about-content">
+            <section id="purpose">
+                <p class="eyebrow">01 / THE QUESTION</p>
+                <h2>Where could your skills take you?</h2>
+                <p>Automation changes the tasks people do, but a single score cannot describe a whole career. Secureer pairs an experimental exposure assessment with related roles and skills, giving people a way to explore possible next steps.</p>
+                <p>The original class project combined MyJob’s Myanmar job-listing data with occupation-level computerisation research from Frey and Osborne and nine O*NET bottleneck descriptions. This portfolio edition makes that work easier to try and inspect.</p>
+            </section>
+            <section id="methodology">
+                <p class="eyebrow">02 / HOW IT WORKS</p>
+                <h2>Two modes. Clear boundaries.</h2>
+                <div class="method-card">
+                    <span class="pill">DEFAULT · NO MODEL DOWNLOAD</span>
+                    <h3>Offline reference demo</h3>
+                    <p>Your title is compared with the 702 historical occupations using normalized keyword overlap. A sufficiently close match supplies its historical reference index; an unfamiliar title receives no score. Your skills rank related roles using inverse-frequency weighted keyword similarity.</p>
+                    <p>This mode demonstrates the product flow. It does not run the original ML model, and skills do not change its exposure score.</p>
+                </div>
+                <div class="method-card">
+                    <span class="pill">OPTIONAL · ORIGINAL ML PIPELINE</span>
+                    <h3>Semantic career exploration</h3>
+                    <p>The all-MiniLM-L6-v2 sentence transformer encodes titles and skills. K-means assigns a title to one of 20 occupation clusters; a nearest-neighbor model finds five related roles by skill similarity. Both algorithms are fitted to the included datasets when the engine first loads.</p>
+                    <p>The exposure index averages the cluster’s historical occupation score and the cosine distance between your skills and nine O*NET bottleneck descriptions. The distance is bounded to 0–1, and the final index is displayed on a 0–100 scale.</p>
+                    <p>Both modes identify shared skills and suggest additional skills found in the matched roles. Recommendations are ranked by skill similarity, not by exposure.</p>
+                </div>
+            </section>
+            <section id="data">
+                <p class="eyebrow">03 / THE DATA</p>
+                <h2>A snapshot of a specific job market.</h2>
+                <div class="data-table-wrap">
+                    <table>
+                        <caption class="sr-only">Datasets used by Secureer</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Source</th>
+                                <th scope="col">Included records</th>
+                                <th scope="col">Used for</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">Processed MyJob data</th>
+                                <td>872 job titles</td>
+                                <td>Role and skill recommendations</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Occupation reference table</th>
+                                <td>702 occupations</td>
+                                <td>Historical computerisation scores</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">O*NET bottlenecks</th>
+                                <td>9 descriptions</td>
+                                <td>Skill-distance component in ML mode</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>The job data was prepared for the 2024 class project. It is not a live feed. Source titles and skill labels can be incomplete or inconsistent, and the data does not represent every occupation or industry.</p>
+            </section>
+            <section id="limitations">
+                <p class="eyebrow">04 / INTERPRETATION</p>
+                <h2>A conversation starter, with limits.</h2>
+                <ul class="prose-list">
+                    <li><strong>An index, not an individual forecast.</strong> Neither mode estimates your personal chance of losing a job or a date when a role will be automated.</li>
+                    <li><strong>Historical context matters.</strong> The underlying occupation research predates recent generative AI developments and describes a different labor market. Transferring those scores to Myanmar is an experimental assumption.</li>
+                    <li><strong>Similarity is not suitability.</strong> Matching words or embeddings cannot establish your qualifications, interests, salary expectations, or the availability of a role.</li>
+                    <li><strong>No claimed predictive accuracy.</strong> This repository does not establish real-world job-loss outcomes or calibrated individual risk. Lower and higher bands are interface conventions: ≤40, &gt;40–70, and &gt;70.</li>
+                </ul>
+            </section>
+            <section id="privacy">
+                <p class="eyebrow">05 / YOUR DATA</p>
+                <h2>Only the details the demo needs.</h2>
+                <p>Your first name is optional; a nickname works. Submitting an assessment stores the name you provide, role, skills, and report in this app’s database. A session cookie limits access to your reports to the browser session that created them. The site operator can access stored records.</p>
+                <p>Reports are kept on the server until deleted; closing the browser does not delete them. Use <strong>Delete this report</strong> on the results page before ending your session to remove the profile and report. The browser session remembers up to 20 recent reports; older records remain stored until the site operator removes them. The public example report does not save a profile.</p>
+                <p>There are no analytics scripts or third-party fonts. Inference runs on the application server. ML mode may download model files on its first use; profile text is not sent to a hosted AI service.</p>
+            </section>
+            <section class="about-cta"><h2>Curious where your skills connect?</h2><a class="button primary" href="{% url 'index' %}#assessment">Explore my career <span aria-hidden="true">↗</span></a></section>
+        </div>
+    </div>
+{% endblock %}

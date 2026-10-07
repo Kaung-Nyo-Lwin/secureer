@@ -1,12 +1,16 @@
-version: '3.12'
-
 services:
   web:
     build: .
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
+    environment:
+      DJANGO_DEBUG: "False"
+      DJANGO_SECRET_KEY: "${DJANGO_SECRET_KEY:-local-compose-only-change-before-public-deployment-secureer}"
+      DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1,[::1]"
+      SECUREER_ENGINE: demo
     volumes:
-      - .:/app           # Syncs the entire project directory
-      - ./db.sqlite3:/app/db.sqlite3  # Persistent storage for SQLite database
-    env_file:
-      - .env
+      - secureer-data:/app/var
+    restart: unless-stopped
+
+volumes:
+  secureer-data:
